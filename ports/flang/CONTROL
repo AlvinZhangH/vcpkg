@@ -1,0 +1,4 @@
+Source: flang
+Version: flang_20190329
+Homepage: https://github.com/flang-compiler/flang
+Description: Flang is a Fortran compiler targeting LLVM.
