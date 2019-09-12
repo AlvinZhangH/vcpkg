@@ -1,0 +1,65 @@
+diff --git a/mgllab/CMakeLists.txt b/mgllab/CMakeLists.txt
+index 1649104..76f9b81 100644
+--- a/mgllab/CMakeLists.txt
++++ b/mgllab/CMakeLists.txt
+@@ -38,7 +38,7 @@ if(MGL_HAVE_FLTK)
+ 		set(mgllab_src ${mgllab_src} mgllab.rc)
+ 	endif(WIN32)
+ 	add_executable(mgllab ${mgllab_src} ${mgllab_hdr})
+-	target_link_libraries(mgllab mgl mgl-fltk ${FLTK_LIBRARIES})
++	target_link_libraries(mgllab mgl mgl-fltk mgl-fltk-static mgl-static getopt-static ${FLTK_LIBRARIES})
+ 	install(
+ 		TARGETS mgllab
+ 		RUNTIME DESTINATION bin	)
+diff --git a/mgllab/table.cpp b/mgllab/table.cpp
+index 5243549..c713480 100644
+--- a/mgllab/table.cpp
++++ b/mgllab/table.cpp
+@@ -559,8 +559,8 @@ public:
+ 		o->tooltip(_("Change data values and close this window"));
+ 		w->set_modal();	w->end();
+ 	}
+-	double min()	{	return wmin->value();	}
+-	double max()	{	return wmax->value();	}
++	double _min()	{	return wmin->value();	}
++	double _max()	{	return wmax->value();	}
+ 	int sym()		{	return wsym->value();	}
+ 	bool ok()		{	return !result.empty();	}
+ 	void cb_ok()
+@@ -581,8 +581,8 @@ void fill_cb(Fl_Widget*, void*v)
+ 		HMDT d = dynamic_cast<HMDT>(e->var);
+ 		HADT c = dynamic_cast<HADT>(e->var);
+ 		char ch = nrm_dlg.result[0];
+-		if(d)	{	d->Fill(nrm_dlg.min(),nrm_dlg.max(),ch);	e->refresh();	}
+-		if(c)	{	c->Fill(nrm_dlg.min(),nrm_dlg.max(),ch);	e->refresh();	}
++		if(d)	{	d->Fill(nrm_dlg._min(),nrm_dlg._max(),ch);	e->refresh();	}
++		if(c)	{	c->Fill(nrm_dlg._min(),nrm_dlg._max(),ch);	e->refresh();	}
+ 	}
+ }
+ //-----------------------------------------------------------------------------
+@@ -594,8 +594,8 @@ void normal_cb(Fl_Widget*, void*v)
+ 	{
+ 		HMDT d = dynamic_cast<HMDT>(e->var);
+ 		HADT c = dynamic_cast<HADT>(e->var);
+-		if(d)	{	d->Norm(nrm_dlg.min(),nrm_dlg.max(),nrm_dlg.sym());	e->refresh();	}
+-		if(c)	{	c->Fill(nrm_dlg.min(),nrm_dlg.max(),nrm_dlg.sym());	e->refresh();	}
++		if(d)	{	d->Norm(nrm_dlg._min(),nrm_dlg._max(),nrm_dlg.sym());	e->refresh();	}
++		if(c)	{	c->Fill(nrm_dlg._min(),nrm_dlg._max(),nrm_dlg.sym());	e->refresh();	}
+ 	}
+ }
+ //-----------------------------------------------------------------------------
+diff --git a/utils/mglview.cpp b/utils/mglview.cpp
+index d360df3..4cbe3b9 100644
+--- a/utils/mglview.cpp
++++ b/utils/mglview.cpp
+@@ -29,6 +29,10 @@
+ 	#include "mgl2/qt.h"
+ #endif
+ //-----------------------------------------------------------------------------
++MGL_EXPORT void (*mgl_ask_func)(const wchar_t *, wchar_t *)=0;
++MGL_EXPORT void (*mgl_progress_func)(int value, int maximal, HMGL)=0;
++MGL_EXPORT std::string mglGlobalMess;
++//-----------------------------------------------------------------------------
+ std::wstring str, opt;
+ std::vector<std::string> anim;
+ mglParse p(true);
